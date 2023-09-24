@@ -47,6 +47,12 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+
+
+  tweets        Tweet[]
+  likes         Like[]
+  followers     User[] @relation(name:"Followers") //relacion recursiva M:M
+  follows       User[] @relation(name:"Followers")
 }
 
 model VerificationToken {
@@ -55,4 +61,28 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Tweet{
+  id String @id @default(uuid())
+  userId String 
+  content String @db.VarChar(280)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  likes Like[]
+  
+}
+
+
+model Like{
+  userId String 
+  tweetId String
+  tweet Tweet @relation(fields:[tweetId], references:[id],onDelete:Cascade)
+  user User @relation(fields:[userId], references:[id],onDelete:Cascade)
+
+  @@id([userId,tweetId])
+  // @@index(userId)
+  // @@index(tweetId)
+  
 }
